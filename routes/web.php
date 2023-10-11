@@ -19,27 +19,34 @@ use Illuminate\Support\Facades\Route;
 //    return view('welcome');
 //});
 
+Route::middleware('auth')->group(function () {
+
+    Route::get('/home', [TaskController::class, 'index'])->name('home');
+
+    Route::post('/home-store', [TaskController::class, 'store'])->name('store');
+
+    Route::post('/home-edit', [TaskController::class, 'edit'])->name('edit');
+
+    Route::post('/home-destroy', [TaskController::class, 'destroy'])->name('destroy');
+
+    Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+});
+
+
+
 Route::get('/login', [UserController::class, 'index'])->name('login');
 
 Route::post('/login', [UserController::class, 'login'])->name('postLogin');
 
-Route::get('/home', [TaskController::class, 'index'])->name('home');
+Route::post('/create-account', [UserController::class, 'create'])->name('create-account');
 
-Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+Route::get('/create-account', [UserController::class, 'showCreateAccount'])->name('show-create-account');
 
-Route::post('/create-account', [UserController::class, 'create'])->name('create_account');
-
-Route::get('/create-account', [UserController::class, 'showCreateAccount'])->name('show_create_account');
-
-Route::post('/home-store', [TaskController::class, 'store'])->name('store');
-
-Route::post('/home-edit', [TaskController::class, 'edit'])->name('edit');
-
-Route::post('/home-destroy', [TaskController::class, 'destroy'])->name('destroy');
-
-
-
-
-Route::post('/test', function () {
-    return '<h1>Ce faci Eleno</h1>';
+Route::get('/test', function () {
+    return view('test');
 })->name('test');
+
+
+
+
+

@@ -9,12 +9,12 @@
 <body class="bg-gradient-to-l from-black to-cyan-400 flex justify-center items-center">
 
 <div class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700 mt-20">
-    <form class="space-y-6" method="post" action="{{ route('create_account') }}">
+    <form class="space-y-6" method="post" action="{{ route('create-account') }}">
         @csrf <!-- {{ csrf_field() }} -->
         <h5 class="text-xl font-medium text-gray-900 dark:text-white">Create</h5>
         <div>
-            <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-            <input type="text" name="username" id="username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="hopa_mitica" required>
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
+            <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="hopa_mitica" required>
         </div>
         <div>
             <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>

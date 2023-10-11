@@ -13,35 +13,27 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $username = $request->getSession()->get('username');
-        if (isset($username)) {
-            return redirect()->route('home');
-        } else {
-            return view('login');
-        }
+        return view('login');
     }
 
-    public function login(Request $request)
+    public function login()
     {
-
-        $username = $request->input('username');
-        $password = $request->input('password');
-
-        if (isset($username) && isset($password)) {
-            $user = User::where('name', '=', $username)->where('password', '=', $password)->first();
-            if (isset($user)) {
-                $request->session()->put('username', $username);
-                $request->session()->forget('errorMessage');
-                return redirect()->route('home');
-            }
+        $credentials = request()->validate([
+            'name' => 'required',
+            'password' => 'required',
+        ]);
+        if (auth()->attempt($credentials)) {
+            session()->forget('errorMessage');
+            return redirect()->route('home');
+        } else {
+            return view('login', ['errorMessage' => 'Wrong Credentials!']);
         }
-        return view('login', ['errorMessage' => 'Wrong Credentials!']);
     }
 
 
     public function logout(Request $request)
     {
-        $request->session()->forget('username');
+        auth()->logout();
         return redirect()->route('login');
     }
 
@@ -50,36 +42,33 @@ class UserController extends Controller
      */
     public function create(Request $request)
     {
-        $username = $request->input('username');
-        $password = $request->input('password');
-        $repeatPass = $request->input('repeatPass');
-
-        if (isset($username)) {
-            $user = User::query()->where('name', '=', $username)->first();
-        } else {
-            return redirect()->route('show_create_account');
-        }
+        $password = request('password');
+        $repeatPass = request('repeatPass');
 
         if (isset($password) && isset($repeatPass)) {
             if ($password !== $repeatPass) {
-                return view('create_account', ['errorMessage' => 'Passwords don`t match!']);
+                return view('create-account', ['errorMessage' => 'Passwords don`t match!']);
             }
         }
 
-        if (isset($user)) {
-            return view('create_account', ['errorMessage' => 'Username already exist!']);
+        $validatedData = $request->validate([
+            'name' => 'string|max:255',
+            'password' => 'required',
+        ]);
+
+        if (User::query()->where('name', '=', $validatedData['name'])->first()) {
+            return view('create-account', ['errorMessage' => 'Username already exist!']);
         } else {
-            $newUser = new User();
-            $newUser->name = $username;
-            $newUser->password = $request->input('password');
-            $newUser->save();
-            return redirect()->route('login');
+            User::query()->create(['name' => $validatedData['name'],
+                'password' => bcrypt($validatedData['password'])
+            ]);
         }
+        return redirect()->route('login');
     }
 
     public function showCreateAccount()
     {
-        return view('create_account');
+        return view('create-account');
     }
 
 }

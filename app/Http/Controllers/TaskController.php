@@ -13,29 +13,24 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
-        $username = $request->session()->get('username');
-        if (!isset($username)) {
-            return redirect()->route('login');
-        } else {
-            $tasks = Task::where('user_id', '=', User::where('name', '=', $username)->first()->id)->get();
-            return view('home', ['username' => $username, 'tasks' => $tasks]);
-        }
+        return view('home', ['username' => auth()->user()->name,
+            'tasks' => Task::where('user_id', '=', auth()->user()->id)->get()]);
     }
 
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store()
     {
-        $name = $request->input('addInputName');
-        $user = User::where('name', '=', $request->session()->get('username'))->first();
-        $description = $request->input('addInputDescription');
+        $name = request('addInputName');
+        $description = request('addInputDescription');
+
         if (isset($name) && isset($description)) {
             $newTask = new Task();
             $newTask->name = $name;
             $newTask->description = $description;
-            $newTask->user_id = $user->id;
+            $newTask->user_id = auth()->user()->id;
             $newTask->save();
 
         }
@@ -45,11 +40,11 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Request $request)
+    public function edit()
     {
-        $taskID = $request->input('editInputTaskID');
-        $name = $request->input('editInputName');
-        $description = $request->input('editInputDescription');
+        $taskID = request('editInputTaskID');
+        $name = request('editInputName');
+        $description = request('editInputDescription');
 
         if (isset($name) && isset($description) && isset($taskID)) {
             Task::where('id', '=', $taskID)->update(['name' => $name, 'description' => $description]);
@@ -61,9 +56,9 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy()
     {
-        $taskID = $request->input('deleteInputTaskID');
+        $taskID = request('deleteInputTaskID');
         if (isset($taskID)) {
             Task::where('id', '=', $taskID)->delete();
         }
