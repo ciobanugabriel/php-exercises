@@ -16,11 +16,11 @@ class Authenticate extends Middleware
     {
         return $request->expectsJson() ? null : route('login');
     }
-    public function handle($request, Closure $next, ...$guards)
-    {
-        if (Auth::check()) {
-            // User is not authenticated
-            dd(auth()->user());
-        }
-    }
+//    public function handle($request, Closure $next, ...$guards)
+//    {
+//        if (Auth::check()) {
+//            // User is not authenticated
+//            dd(auth()->user());
+//        }
+//    }
 }

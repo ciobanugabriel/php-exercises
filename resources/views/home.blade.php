@@ -7,10 +7,17 @@
     @vite('resources/css/app.css')
 </head>
 <body class="bg-gradient-to-l from-black to-cyan-400">
-<nav class="bg-cyan-900 p-4 fixed top-0 left-0 right-0 z-10">
+<nav class="bg-cyan-900 p-4 fixed w-full top-0 z-10">
     <div class="container mx-auto flex justify-between items-center">
-        <img src="{{ asset('images/task-logo.png') }}" alt="Task Logo" width="48" height="48">
-        <div class="text-white">Welcome to the jungle, {{ $username }}!</div>
+        @foreach($profilePictures as $profilePicture)
+            @if($profilePicture->id === $user->profile_picture_id)
+                <img src="{{ asset('storage/images/' . $profilePicture->name) }}" alt="Profile Picture" height="75"
+                     width="75"
+                     class="rounded-full">
+                <div class="text-white">Welcome to the jungle, {{ $user->name }}!</div>
+            @endif
+        @endforeach
+
         <img src="{{ asset('/images/log-out.png') }}" class="opacity-50 hover:opacity-100"
              onclick="location.href='{{ route('logout') }}'" alt="Log out" width="48" height="48"/>
     </div>
@@ -35,12 +42,11 @@
                 <img src="{{ asset('images/add.png') }}" class="mx-auto mb-4" onclick="" alt="Edit" width="48"
                      height="48"/>
 
-                <form method="post" action="{{ route('store') }}">
+                <form method="post" action="{{ route('store') }}" enctype="multipart/form-data">
                     @csrf <!-- {{ csrf_field() }} -->
                     <div class="mb-6">
-                        <label for="addInputName" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Task
-                            Name</label>
-                        <input type="text" id="addInputName" name="addInputName"
+                        <label for="addInputImage" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
+                        <input type="file" id="addInputImage" name="addInputImage" accept="image/*"
                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-cyan-500 dark:focus:border-cyan-500"
                                required>
                     </div>
@@ -53,7 +59,7 @@
                     </div>
                     <button type="submit" name="addButtonModal"
                             class="text-white bg-green-600 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-greeb-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                        Add
+                        Post
                     </button>
                     <button type="button"
                             class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
@@ -82,15 +88,13 @@
             <div class="p-6 text-center">
                 <img src="{{ asset('images/edit.png') }}" class="mx-auto mb-4" onclick="" alt="Edit" width="48"
                      height="48"/>
-                <form method="post" action="{{ route('edit') }}">
+                <form method="post" action="{{ route('edit') }}" enctype="multipart/form-data">
                     @csrf <!-- {{ csrf_field() }} -->
-                    <input type="hidden" id="editInputTaskID" name="editInputTaskID">
+                    <input type="hidden" id="editInputPhotoID" name="editInputPhotoID">
                     <div class="mb-6">
-                        <label for="editInputName" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Task
-                            Name</label>
-                        <input type="text" id="editInputName" name="editInputName"
-                               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-cyan-500 dark:focus:border-cyan-500"
-                               required>
+                        <label for="editInputImage" class="flex mb-2 text-sm font-medium text-gray-900 dark:text-white">Image</label>
+                        <input type="file" id="editInputImage" name="editInputImage" accept="image/*"
+                               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-cyan-500 dark:focus:border-cyan-500">
                     </div>
                     <div class="mb-6">
                         <label for="editInputDescription"
@@ -135,7 +139,7 @@
                     this product?</h3>
                 <form method="post" action="{{ route('destroy') }}">
                     @csrf <!-- {{ csrf_field() }} -->
-                    <input type="text" id="deleteInputTaskID" name="deleteInputTaskID" hidden>
+                    <input type="text" id="deleteInputPhotoID" name="deleteInputPhotoID" hidden>
                     <button type="submit" name="deleteButtonModal"
                             class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
                             onclick="closeModalById('delete-modal')">
@@ -152,50 +156,66 @@
     </div>
 </div>
 
-
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg flex items-center justify-center h-screen">
-
-    <table class="rounded-lg overflow-hidden w-3/4 text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-        <tr>
-            <th scope="col" class="px-6 py-3">
-                Task Name
-            </th>
-            <th scope="col" class="px-6 py-3">
-                Description
-            </th>
-            <th scope="col" class="px-6 py-3 flex justify-center ">
-                <button id="addButton" type="button" onclick="showModalById('add-modal')">
-                    <img src="{{ asset('images/add.png') }}" class="opacity-50 hover:opacity-100 mr-2" onclick=""
-                         alt="Edit" width="20" height="20"/>
-                </button>
-            </th>
-        </tr>
-        </thead>
+<div class="container mx-auto p-4 w-3/5 mt-24">
+    <button id="addButton" type="button" onclick="showModalById('add-modal')">
+        <img src="{{ asset('images/add.png') }}" class="p-2 mb-1 opacity-50 hover:opacity-100"
+             alt="Edit" width="50" height="50"/>
+    </button>
+    <table class="w-full bg-cyan-200 shadow-lg rounded-lg overflow-hidden flex justify-center">
         <tbody>
-        @foreach($tasks as $task)
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{ $task['name'] }}
-                </th>
-                <td class="px-6 py-4">
-                    {{ $task['description'] }}
-                </td>
-                <td class="px-6 py-4 text-right flex justify-center">
-                    <button type="button" name="editButton" id="editButton"
-                            onclick="showModalById('edit-modal'); sendDataForEditModal({{ $task['id'] }}, '{{ $task['name'] }}', '{{ $task['description'] }}')">
-                        <img src="{{ asset('images/edit.png') }}" class="opacity-50 hover:opacity-100 mr-2" onclick=""
-                             alt="Edit" width="20" height="20"/>
-                    </button>
-                    <button type="button" name="deleteButton" id="deleteButton"
-                            onclick="showModalById('delete-modal'); sendDataForDeleteModal({{ $task['id'] }})">
-                        <img src="{{ asset('images/delete.png') }}" class="opacity-50 hover:opacity-100 mr-2" onclick=""
-                             alt="Delete" width="20" height="20"/>
-                    </button>
-        @endforeach
+        @isset($photos)
+            @foreach($photos as $photo)
+                <tr>
+                    <td class="p-4 border-b-2 border-cyan-800">
+                        <div class="flex items-center">
+                            @foreach($profilePictures as $profilePicture)
+                                @if($photo->user->profile_picture_id === $profilePicture->id)
+                                    <img src="{{ asset('storage/images/' . $profilePicture->name) }}" alt="User"
+                                         class="w-10 h-10 rounded-full">
+                                @endif
+                            @endforeach
+
+                            <div class="flex">
+                                <div class="ml-4">
+                                    <div class="text-gray-800 font-semibold">{{ $photo->user->name }}</div>
+                                    <div class="text-gray-600">{{ $photo->updated_at }}</div>
+                                </div>
+                                <p class="mx-10"></p>
+                                @if($photo->user->id === $user->id)
+                                    <div class="ml-auto flex space-x-4">
+                                        <button type="button" name="editButton" id="editButton"
+                                                onclick="showModalById('edit-modal'); sendDataForEditModal({{ $photo->id }}, '{{ $photo->description }}')">
+                                            <img src="{{ asset('images/edit.png') }}"
+                                                 class="opacity-50 hover:opacity-100 mr-2"
+                                                 onclick=""
+                                                 alt="Edit" width="20" height="20"/>
+                                        </button>
+                                        <button type="button" name="deleteButton" id="deleteButton"
+                                                onclick="showModalById('delete-modal'); sendDataForDeleteModal({{ $photo->id }})">
+                                            <img src="{{ asset('images/delete.png') }}"
+                                                 class="opacity-50 hover:opacity-100 mr-2" onclick=""
+                                                 alt="Delete" width="20" height="20"/>
+                                        </button>
+                                        @endif
+
+                                    </div>
+                            </div>
+
+                        </div>
+                        <p class="mt-2 text-gray-700">
+                            {{ $photo->description }}
+                        </p>
+                        <img src="{{ asset('storage/images/' . $photo->name) }}" alt="Post Image"
+                             class="mt-4 rounded-lg shadow-md"
+                             height="250" width="400">
+                    </td>
+                </tr>
+            @endforeach
+        @endisset
         </tbody>
     </table>
 </div>
+
 
 <script>
     const editButton = document.getElementById('editButton');
@@ -220,21 +240,13 @@
     }
 
     function sendDataForDeleteModal(taskID) {
-        document.getElementById('deleteInputTaskID').value = taskID;
-        console.log("DeletE user with id: " + taskID);
+        document.getElementById('deleteInputPhotoID').value = taskID;
     }
 
-    function sendDataForEditModal(taskID, name, description) {
-        document.getElementById('editInputTaskID').value = taskID;
-        document.getElementById('editInputName').value = name;
+    function sendDataForEditModal(taskID, description) {
+        document.getElementById('editInputPhotoID').value = taskID;
         document.getElementById('editInputDescription').value = description;
-
-        console.log("Edit -> " + "Id: " + taskID + " name: " + name + " description: " + description);
     }
-
-    // function submitFormById(formID){
-    //     document.getElementById(formID).submit();
-    // }
 
     // Add event listener to close the modal when clicking outside of it
     document.addEventListener('click', (e) => {
